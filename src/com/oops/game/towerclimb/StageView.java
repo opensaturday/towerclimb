@@ -3,14 +3,24 @@ package com.oops.game.towerclimb;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Shader;
+import android.graphics.PorterDuff.Mode;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.oops.game.towerclimb.common.Creature;
+
 public class StageView extends SurfaceView implements SurfaceHolder.Callback {
 	
+	private boolean turnOff = false;
 	private StageThread stageThread;
+	
+	private Creature a = new Creature();
+	private Creature b = new Creature();
 	
 	public StageView(Context context) {
 		super(context);
@@ -28,6 +38,10 @@ public class StageView extends SurfaceView implements SurfaceHolder.Callback {
 		super(context, attrs, defStyle);
 		// TODO Auto-generated constructor stub
 		init();
+	}
+	
+	public void setTurnOff() {
+		turnOff = true;
 	}
 	
 	@Override
@@ -59,6 +73,22 @@ public class StageView extends SurfaceView implements SurfaceHolder.Callback {
 	public void init() {
 //		getHolder().setFormat(PixelFormat.TRANSPARENT);
 		getHolder().addCallback(this);
+		
+		a.currentActionPoint = 10;
+		a.currentHeatPoint = 100;
+		a.currentMagicPoint = 100;
+		
+		a.maxActionPoint = 10;
+		a.maxHeatPoint = 100;
+		a.maxManaPoint = 100;
+		
+		b.currentActionPoint = 30;
+		b.currentHeatPoint = 100;
+		b.currentMagicPoint = 100;
+		
+		b.maxActionPoint = 30;
+		b.maxHeatPoint = 500;
+		b.maxManaPoint = 500;
 	}
 	
 	public class StageThread extends Thread {
@@ -82,22 +112,51 @@ public class StageView extends SurfaceView implements SurfaceHolder.Callback {
 		
 		public void run() {
 			super.run();
+			
 			while (threadRunning) {
+				
 				synchronized (sHolder) {
 					
 					// perform other operations
 					Canvas mCanvas = sHolder.lockCanvas();
 					if ( mCanvas == null ) return;
-//					mCanvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-					mCanvas.drawColor(Color.BLACK);
-					
-					// todo ..
-					
+					mCanvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
+			        
+			        if ( turnOff == true ) 
+			        {
+			        	Log.d("YSK", "A : " + a.currentActionPoint);
+			        	Log.d("YSK", "B : " + b.currentActionPoint);
+			        	
+			        	if ( a.currentActionPoint > 0 )
+			        	{
+			        		a.currentActionPoint--;
+			        	}
+			        	else 
+			        	{
+			        		a.currentActionPoint = a.maxActionPoint;
+			        	}
+			        	
+			        	if ( b.currentActionPoint > 0 )
+			        	{
+			        		b.currentActionPoint--;
+			        	}
+			        	else 
+			        	{
+			        		b.currentActionPoint = b.maxActionPoint;
+			        	}
+			        	turnOff = false;
+			        }
+			        
+			        Paint pnt = new Paint();
+			        pnt.setShader(new LinearGradient(0, -50, 0, 50, Color.BLACK, Color.WHITE, Shader.TileMode.MIRROR));
+			        mCanvas.drawRect(0, 0, 50, 50, pnt);
+			        
 					if (mCanvas != null) {
 						sHolder.unlockCanvasAndPost(mCanvas);
 					}
 					
 				}
+				
 			}
 			
 		}
